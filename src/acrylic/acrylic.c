@@ -22,10 +22,6 @@ void acrylic_event(acrylic_t a, acrylic_event_type_t type, acrylic_event_t *even
 
 void acrylic_process(acrylic_t a, float *data, int num_samples)
 {
-    for (int i = 0; i < num_samples; i++)
-    {
-        data[i] = ((float)rand() / RAND_MAX) - 0.5f;
-    }
 }
 
 void acrylic_free(acrylic_t instance)

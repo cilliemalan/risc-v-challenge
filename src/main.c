@@ -24,8 +24,40 @@ static struct buttondata
     float y;
     float r;
     Color c;
-    bool down;
+    bool mouse_down;
+    bool key_down;
+    bool is_down;
 } buttons[16 + 6 + 2];
+
+static int buttonkeys[16 + 6 + 2] =
+    {
+        KEY_A, // C
+        KEY_W, // C#
+        KEY_S, // D
+        KEY_E, // D#
+        KEY_D, // E
+        KEY_F, // F
+        KEY_T, // F#
+        KEY_G, // G
+        KEY_Y, // G#
+        KEY_H, // A
+        KEY_U, // A#
+        KEY_J, // B
+        KEY_K, // C
+        KEY_O, // C#
+        KEY_L, // D
+        KEY_P, // D#
+
+        KEY_Z,          // l1
+        KEY_X,          // l2
+        KEY_C,          // l3
+        KEY_LEFT_SHIFT, // LE
+
+        KEY_COMMA,       // r1
+        KEY_PERIOD,      // r2
+        KEY_SLASH,       // r3
+        KEY_RIGHT_SHIFT, // RE
+};
 
 static Texture displayTexture;
 static lv_disp_t *lvgl_display;
@@ -42,6 +74,14 @@ static void button_pressed(int button)
     acrylic_event_t e;
     e.button.number = button;
     acrylic_event(acrylic, ACRYLIC_EVENT_TYPE_BUTTON_DOWN, &e);
+}
+
+static void encoder_moved(int encoder, int direction)
+{
+    acrylic_event_t e;
+    e.encoder.encoder = (acrylic_encoder_t)encoder;
+    e.encoder.direction = (acrylic_direction_t)direction;
+    acrylic_event(acrylic, ACRYLIC_EVENT_TYPE_ENCODER, &e);
 }
 
 static void button_released(int button)
@@ -139,37 +179,31 @@ static void init_buttons()
         buttons[i].y = sinf(t) * 160.0f + sh2;
         buttons[i].r = 20.0f;
         buttons[i].c = DARKGRAY;
-        buttons[i].down = false;
     }
 
     for (int i = 0; i < 3; i++)
     {
         float t = i * (PI * 7.5f / 180.0f) - (3.5f * PI * 15.0f / 180.0f);
-        buttons[i + 16].x = -cosf(t) * 160.0f + sw2;
-        buttons[i + 16].y = sinf(t) * 160.0f + sh2;
-        buttons[i + 16].r = 10.0f;
-        buttons[i + 16].c = DARKGRAY;
-        buttons[i + 16].down = false;
-        buttons[16 + 6 - i - 1].x = cosf(t) * 160.0f + sw2;
-        buttons[16 + 6 - i - 1].y = sinf(t) * 160.0f + sh2;
-        buttons[16 + 6 - i - 1].r = 10.0f;
-        buttons[16 + 6 - i - 1].c = DARKGRAY;
-        buttons[16 + 6 - i - 1].down = false;
+        buttons[2 - i + 16].x = -cosf(t) * 160.0f + sw2;
+        buttons[2 - i + 16].y = sinf(t) * 160.0f + sh2;
+        buttons[2 - i + 16].r = 10.0f;
+        buttons[2 - i + 16].c = DARKGRAY;
+        buttons[16 + 4 + i].x = cosf(t) * 160.0f + sw2;
+        buttons[16 + 4 + i].y = sinf(t) * 160.0f + sh2;
+        buttons[16 + 4 + i].r = 10.0f;
+        buttons[16 + 4 + i].c = DARKGRAY;
     }
 
-    for (int i = 0; i < 1; i++)
     {
-        float t = i * (PI * 7.5f / 180.0f) - (3.0f * PI * 15.0f / 180.0f);
-        buttons[i + 16 + 6].x = cosf(t) * 190.0f + sw2;
-        buttons[i + 16 + 6].y = sinf(t) * 190.0f + sh2;
-        buttons[i + 16 + 6].r = 20.0f;
-        buttons[i + 16 + 6].c = DARKGRAY;
-        buttons[i + 16 + 6].down = false;
-        buttons[i + 16 + 6 + 1].x = -cosf(t) * 190.0f + sw2;
-        buttons[i + 16 + 6 + 1].y = sinf(t) * 190.0f + sh2;
-        buttons[i + 16 + 6 + 1].r = 20.0f;
-        buttons[i + 16 + 6 + 1].c = DARKGRAY;
-        buttons[i + 16 + 6 + 1].down = false;
+        float t = -(3.0f * PI * 15.0f / 180.0f);
+        buttons[16 + 3].x = -cosf(t) * 190.0f + sw2;
+        buttons[16 + 3].y = sinf(t) * 190.0f + sh2;
+        buttons[16 + 3].r = 20.0f;
+        buttons[16 + 3].c = DARKGRAY;
+        buttons[16 + 4 + 3].x = cosf(t) * 190.0f + sw2;
+        buttons[16 + 4 + 3].y = sinf(t) * 190.0f + sh2;
+        buttons[16 + 4 + 3].r = 20.0f;
+        buttons[16 + 4 + 3].c = DARKGRAY;
     }
 }
 
@@ -208,13 +242,14 @@ static void do_buttons()
     Vector2 mp = GetMousePosition();
     float mx = mp.x;
     float my = mp.y;
-
+    int numbuttons = sizeof(buttons) / sizeof(buttons[0]);
     mouse_button_is_down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
-    if (mouse_button_is_down != mouse_button_was_down)
+
+    for (int i = 0; i < numbuttons; i++)
     {
-        if (mouse_button_is_down)
+        if (mouse_button_is_down != mouse_button_was_down)
         {
-            for (int i = 0; i < sizeof(buttons) / sizeof(buttons[0]); i++)
+            if (mouse_button_is_down)
             {
                 float bx = buttons[i].x;
                 float by = buttons[i].y;
@@ -223,25 +258,53 @@ static void do_buttons()
                 float sqr = br * br;
                 if (sqdist <= sqr)
                 {
-                    button_pressed(i);
-                    buttons[i].down = true;
+                    buttons[i].mouse_down = true;
                 }
             }
-        }
-        else
-        {
-            for (int i = 0; i < sizeof(buttons) / sizeof(buttons[0]); i++)
+            else
             {
-                if (buttons[i].down)
+                if (buttons[i].mouse_down)
                 {
                     button_released(i);
-                    buttons[i].down = false;
+                    buttons[i].mouse_down = false;
                 }
             }
         }
 
-        mouse_button_was_down = mouse_button_is_down;
+        buttons[i].key_down = IsKeyDown(buttonkeys[i]);
+
+        bool is_down = buttons[i].mouse_down || buttons[i].key_down;
+
+        if (buttons[i].is_down != is_down)
+        {
+            buttons[i].is_down = is_down;
+            if (is_down)
+            {
+                button_pressed(i);
+            }
+            else
+            {
+                button_released(i);
+            }
+        }
     }
+}
+
+static void do_encoders()
+{
+    bool e1l = IsKeyPressed(KEY_LEFT_CONTROL);
+    bool e1r = IsKeyPressed(KEY_LEFT_ALT);
+    bool e2l = IsKeyPressed(KEY_RIGHT_ALT);
+    bool e2r = IsKeyPressed(KEY_RIGHT_CONTROL);
+
+    if (e1l && !IsKeyDown(KEY_LEFT_ALT))
+        encoder_moved(0, 0);
+    if (e1r && !IsKeyDown(KEY_LEFT_CONTROL))
+        encoder_moved(0, 1);
+    if (e2l && !IsKeyDown(KEY_RIGHT_CONTROL))
+        encoder_moved(1, 0);
+    if (e2r && !IsKeyDown(KEY_RIGHT_ALT))
+        encoder_moved(1, 1);
 }
 
 static void do_draw()
@@ -265,7 +328,7 @@ static void do_draw()
         float y = buttons[i].y;
         float r = buttons[i].r;
         Color c = buttons[i].c;
-        if (buttons[i].down)
+        if (buttons[i].is_down)
         {
             DrawCircleGradient(x, y, r, RAYWHITE, c);
         }
@@ -291,6 +354,7 @@ int main()
         lv_task_handler();
 
         do_buttons();
+        do_encoders();
         do_draw();
     }
 
