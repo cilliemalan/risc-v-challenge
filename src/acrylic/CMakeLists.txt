@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
-add_library(acrylic acrylic.c)
+add_library(acrylic 
+    acrylic.c
+    synth/filter.c
+    synth/oscillator.c)
 
 target_link_libraries(acrylic PRIVATE lvgl)
 target_include_directories(acrylic PUBLIC .)
