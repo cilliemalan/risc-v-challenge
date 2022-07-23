@@ -1,4 +1,7 @@
 #include "filter.h"
+#include "synth.h"
+
+#include <math.h>
 
 /*
 
@@ -215,20 +218,58 @@ highShelf:  H(s) = A * (A*s^2 + (sqrt(A)/Q)*s + 1) / (s^2 + (sqrt(A)/Q)*s + A)
 
 */
 
-void acrylic_filter_process(float* buffer, unsigned int amt, filter_t *filter)
+#define TAU 6.2831853f
+#define PI 3.14159265f
+
+float afsinf(float x)
 {
-	for (unsigned int i = 0; i < amt; i++)
-	{
-		filter->px2 = filter->px1;
-		filter->px1 = filter->px0;
-		filter->px0 = buffer[i];
-		filter->py2 = filter->py1;
-		filter->py1 = filter->py0;
-		filter->py0 = filter->a0 * filter->px0
-			+ filter->a1 * filter->px1
-			+ filter->a2 * filter->px2
-			- filter->b1 * filter->py1
-			- filter->b2 * filter->py2;
-		buffer[i] = filter->py0;
-	}
+    if (x < 0)
+        return 1.27323954f * x + .405284735f * x * x;
+    else
+        return 1.27323954f * x - 0.405284735f * x * x;
+}
+
+float afcosf(float x)
+{
+    x += 1.57079632f;
+    if (x > 3.14159265f)
+        x -= 6.28318531f;
+
+    if (x < 0)
+        return 1.27323954f * x + 0.405284735f * x * x;
+    else
+        return 1.27323954f * x - 0.405284735f * x * x;
+}
+
+void acrylic_filter_lowpass(float frequency, float q, filter_t *filter)
+{
+    float omega = TAU * OO_SAMPLE_RATE * frequency;
+    float s = afsinf(omega);
+    float c = afcosf(omega);
+    float a = s * areciprocal(2.0f * q);
+
+    float oob0 = areciprocal((1 - c) * 0.5f);
+    filter->b1 = oob0 * (1 - c);
+    filter->b2 = oob0 * ((1 - c) * 0.5f);
+    filter->a0 = oob0 * (1 + a);
+    filter->a1 = oob0 * (-2 * c);
+    filter->a2 = oob0 * (1 - a);
+}
+
+void acrylic_filter_process(float *buffer, unsigned int amt, filter_t *filter)
+{
+    for (unsigned int i = 0; i < amt; i++)
+    {
+        filter->px2 = filter->px1;
+        filter->px1 = filter->px0;
+        filter->px0 = buffer[i];
+        filter->py2 = filter->py1;
+        filter->py1 = filter->py0;
+        filter->py0 = filter->a0 * filter->px0 +
+                      filter->a1 * filter->px1 +
+                      filter->a2 * filter->px2 -
+                      filter->b1 * filter->py1 -
+                      filter->b2 * filter->py2;
+        buffer[i] = filter->py0;
+    }
 }
