@@ -10,6 +10,7 @@ typedef enum acrylic_event_type
     ACRYLIC_EVENT_TYPE_BUTTON_DOWN,
     ACRYLIC_EVENT_TYPE_BUTTON_UP,
     ACRYLIC_EVENT_TYPE_ENCODER,
+    ACRYLIC_EVENT_TYPE_MIDI,
 } acrylic_event_type_t;
 
 typedef enum acrylic_encoder
@@ -35,6 +36,12 @@ typedef union acrylic_event
         acrylic_encoder_t encoder;
         acrylic_direction_t direction;
     } encoder;
+    struct
+    {
+        unsigned char status;
+        unsigned char data0;
+        unsigned char data1;
+    } midi;
 } acrylic_event_t;
 
 typedef struct acrylic *acrylic_t;
