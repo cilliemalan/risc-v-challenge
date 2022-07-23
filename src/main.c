@@ -66,9 +66,6 @@ static acrylic_t acrylic;
 static Vector2 circle_points[128];
 static Vector2 circle_texcoords[128];
 
-static bool mouse_button_was_down = false;
-static bool mouse_button_is_down = false;
-
 static void button_pressed(int button)
 {
     acrylic_event_t e;
@@ -243,32 +240,22 @@ static void do_buttons()
     float mx = mp.x;
     float my = mp.y;
     int numbuttons = sizeof(buttons) / sizeof(buttons[0]);
-    mouse_button_is_down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+    bool mouse_button_is_down = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
 
     for (int i = 0; i < numbuttons; i++)
     {
-        if (mouse_button_is_down != mouse_button_was_down)
+        if (mouse_button_is_down)
         {
-            if (mouse_button_is_down)
-            {
-                float bx = buttons[i].x;
-                float by = buttons[i].y;
-                float br = buttons[i].r;
-                float sqdist = (bx - mx) * (bx - mx) + (by - my) * (by - my);
-                float sqr = br * br;
-                if (sqdist <= sqr)
-                {
-                    buttons[i].mouse_down = true;
-                }
-            }
-            else
-            {
-                if (buttons[i].mouse_down)
-                {
-                    button_released(i);
-                    buttons[i].mouse_down = false;
-                }
-            }
+            float bx = buttons[i].x;
+            float by = buttons[i].y;
+            float br = buttons[i].r;
+            float sqdist = (bx - mx) * (bx - mx) + (by - my) * (by - my);
+            float sqr = br * br;
+            buttons[i].mouse_down = sqdist <= sqr;
+        }
+        else
+        {
+            buttons[i].mouse_down = false;
         }
 
         buttons[i].key_down = IsKeyDown(buttonkeys[i]);
