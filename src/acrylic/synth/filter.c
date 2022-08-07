@@ -1,5 +1,6 @@
 #include "filter.h"
 #include "synth.h"
+#include "util.h"
 
 #include <math.h>
 
@@ -217,29 +218,6 @@ highShelf:  H(s) = A * (A*s^2 + (sqrt(A)/Q)*s + 1) / (s^2 + (sqrt(A)/Q)*s + A)
 
 
 */
-
-#define TAU 6.2831853f
-#define PI 3.14159265f
-
-float afsinf(float x)
-{
-    if (x < 0)
-        return 1.27323954f * x + .405284735f * x * x;
-    else
-        return 1.27323954f * x - 0.405284735f * x * x;
-}
-
-float afcosf(float x)
-{
-    x += 1.57079632f;
-    if (x > 3.14159265f)
-        x -= 6.28318531f;
-
-    if (x < 0)
-        return 1.27323954f * x + 0.405284735f * x * x;
-    else
-        return 1.27323954f * x - 0.405284735f * x * x;
-}
 
 void acrylic_filter_lowpass(float frequency, float q, filter_t *filter)
 {

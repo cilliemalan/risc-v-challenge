@@ -32,6 +32,9 @@ typedef struct acrylic_envelope_state
     float level;
 } acrylic_envelope_state_t;
 
+// instant attack and release, no decay.
+static const acrylic_envelope_t acrylic_envelope_default = { 0, 0, 1, 0, 1, 0, 1 };
+
 /** @brief Calculates precomputed values for an envelope. */
 void acrylic_envelope_initialize(acrylic_envelope_t *envelope);
 

@@ -5,6 +5,7 @@ add_library(acrylic
     synth/filter.c
     synth/envelope.c
     synth/oscillator.c
+    synth/synth.c
     synth/util.c)
 
 target_link_libraries(acrylic PRIVATE lvgl)

@@ -8,7 +8,12 @@
 #include "filter.h"
 #include "util.h"
 
-struct acrylic_synth {
+typedef struct acrylic_synth {
     acrylic_oscillator_t oscillator1;
     acrylic_oscillator_t oscillator2;
 } acrylic_synth_t;
+
+void acrylic_synth_process(acrylic_synth_t *a, float *data, int num_samples);
+void acrylic_synth_note_trigger(acrylic_synth_t *a, char note, int velocity);
+void acrylic_synth_note_release(acrylic_synth_t *a, char note);
+

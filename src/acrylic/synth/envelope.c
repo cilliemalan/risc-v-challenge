@@ -3,9 +3,23 @@
 
 void acrylic_envelope_initialize(acrylic_envelope_t *envelope)
 {
-	envelope->_attack_rate = OO_SAMPLE_RATE / envelope->attack;
-	envelope->_decay_rate = OO_SAMPLE_RATE / envelope->decay;
-	envelope->_release_rate = OO_SAMPLE_RATE / envelope->release;
+    // OO_SAMPLE_RATE is the minimum attack/decay/release time
+    // and results in the maximum rate of 1
+
+    if (envelope->attack > OO_SAMPLE_RATE)
+        envelope->_attack_rate = OO_SAMPLE_RATE / envelope->attack;
+    else
+        envelope->_attack_rate = 1;
+
+    if (envelope->decay > OO_SAMPLE_RATE)
+        envelope->_decay_rate = OO_SAMPLE_RATE / envelope->decay;
+    else
+        envelope->_decay_rate = 1;
+
+    if (envelope->release > OO_SAMPLE_RATE)
+        envelope->_release_rate = OO_SAMPLE_RATE / envelope->release;
+    else
+        envelope->_release_rate = 1;
 }
 
 float acrylic_envelope_tick(acrylic_envelope_state_t *state, acrylic_envelope_t *envelope)
@@ -45,12 +59,12 @@ float acrylic_envelope_tick(acrylic_envelope_state_t *state, acrylic_envelope_t 
     return state->level;
 }
 
-void acrylic_envelope_trigger(acrylic_envelope_state_t* state, acrylic_envelope_t *envelope)
+void acrylic_envelope_trigger(acrylic_envelope_state_t *state, acrylic_envelope_t *envelope)
 {
     state->mode = ACRYLIC_OSCILLATOR_MODE_ATTACK;
 }
 
-void acrylic_envelope_release(acrylic_envelope_state_t* state, acrylic_envelope_t *envelope)
+void acrylic_envelope_release(acrylic_envelope_state_t *state, acrylic_envelope_t *envelope)
 {
     state->mode = ACRYLIC_OSCILLATOR_MODE_RELEASE;
 }

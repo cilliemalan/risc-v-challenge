@@ -3,6 +3,7 @@
 #include <math.h>
 #include <assert.h>
 #include "acrylic.h"
+#include "acrylic/synth/util.h"
 
 #define screenWidth 800
 #define screenHeight 450
@@ -206,22 +207,25 @@ static void init_buttons()
 
 static void audio_callback(void *buffer, unsigned int frames)
 {
-    float tmp[48];
-    const int tmpsize = sizeof(tmp) / sizeof(tmp[0]);
-    uint16_t *b = (uint16_t *)buffer;
-
-    while (frames > 0)
+    if (acrylic)
     {
-        int amt = frames > tmpsize ? tmpsize : frames;
-        acrylic_process(acrylic, tmp, amt);
+        uint16_t *b = (uint16_t *)buffer;
 
-        for (int i = 0; i < amt; i++)
+        while (frames > 0)
         {
-            b[i] = (uint16_t)(tmp[i] * 32767.0f);
-        }
+            float tmp[48] = {0};
+            const int tmpsize = sizeof(tmp) / sizeof(tmp[0]);
+            int amt = frames > tmpsize ? tmpsize : frames;
+            acrylic_process(acrylic, tmp, amt);
 
-        b += amt;
-        frames -= amt;
+            for (int i = 0; i < amt; i++)
+            {
+                b[i] = (uint16_t)(tmp[i] * 32767.0f);
+            }
+
+            b += amt;
+            frames -= amt;
+        }
     }
 }
 
@@ -330,6 +334,7 @@ static void do_draw()
 
 int main()
 {
+    init_acrylic();
     init_window();
     init_display();
     init_buttons();
