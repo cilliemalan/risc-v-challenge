@@ -2,11 +2,10 @@
 #include "synth.h"
 #include <math.h>
 
-void acrylic_limiter_init(acrylic_limiter_t *a, float decay_time, float target)
+void acrylic_limiter_init(acrylic_limiter_t *a, float target)
 {
     a->factor = 1.0f;
     a->target_factor = 1.0f;
-    a->decay_rate = (OO_SAMPLE_RATE / decay_time);
     a->target = target;
 }
 
@@ -33,13 +32,12 @@ void acrylic_limiter_process(acrylic_limiter_t *a, float *samples, int amount)
 
         if (fabsf(ns) > a->target)
         {
-            float nf = fabs(a->target / s);
+            float nf = fabs(a->target / (s * 1.1f));
             a->target_factor = nf;
-            //ns = s < 0 ? -a->factor : a->factor;
         }
         else if (a->factor < 1.0f)
         {
-            a->target_factor += a->decay_rate;
+            a->target_factor *= 1.0001;
         }
 
         samples[i] = ns;
