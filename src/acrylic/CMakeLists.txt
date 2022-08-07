@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 add_library(acrylic 
     acrylic.c
-    synth/filter.c
     synth/envelope.c
+    synth/filter.c
+    synth/limiter.c
     synth/oscillator.c
     synth/synth.c
     synth/util.c)

@@ -3,16 +3,19 @@
 #include "util.h"
 #include "assert.h"
 
+#include <math.h>
+
 static float calc_waveform(float t, acrylic_waveform_t type)
 {
     switch (type)
     {
     case ACRYLIC_WAVEFORM_SINE:
-        return afsinf(t * 2.0f * PI);
+        //return afsinf((t - 0.5) * 2.0f * PI);
+        return sinf((t - 0.5) * 2.0f * PI);
     case ACRYLIC_WAVEFORM_SQUARE:
         return t < 0.5f ? 1.0f : -1.0f;
     case ACRYLIC_WAVEFORM_SAW:
-        return t;
+        return (t - 0.5f) * 2.0f;
     case ACRYLIC_WAVEFORM_TRIANGLE:
         if (t < 0.25f)
             return t * 4.0f;
@@ -77,12 +80,13 @@ void acrylic_oscillator_process(float *buffer, unsigned int amt, acrylic_oscilla
                 else
                 {
                     // the note is done
+                    memset(note, 0, sizeof(*note));
                     note->note = 0;
                 }
             }
         }
 
-        buffer[i] += total_sample;
+        buffer[i] = total_sample;
     }
 }
 

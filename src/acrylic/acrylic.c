@@ -11,23 +11,13 @@ struct acrylic
     acrylic_synth_t synth;
 };
 
-static void init_synth(acrylic_synth_t* s)
-{
-    s->oscillator1.amplitude_envelope.attack = 0;
-    s->oscillator1.amplitude_envelope.decay = 0;
-    s->oscillator1.amplitude_envelope.sustain = 1;
-    s->oscillator1.amplitude_envelope.release = 0;
-    s->oscillator1.volume = 1;
-    s->oscillator1.waveform = ACRYLIC_WAVEFORM_SAW;
-    acrylic_envelope_initialize(&s->oscillator1.amplitude_envelope);
-}
 
 acrylic_t acrylic_new(acrylic_config_t *config)
 {
     acrylic_t a = (acrylic_t)calloc(1, sizeof(struct acrylic));
     memcpy(&a->config, config, sizeof(acrylic_config_t));
 
-    init_synth(&a->synth);
+    acrylic_synth_init(&a->synth);
     return a;
 }
 
