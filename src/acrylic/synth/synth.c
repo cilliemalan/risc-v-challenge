@@ -11,7 +11,7 @@ void acrylic_synth_init(acrylic_synth_t *s)
     s->oscillator.volume = 1;
     s->oscillator.waveform = ACRYLIC_WAVEFORM_SINE;
     acrylic_envelope_initialize(&s->oscillator.amplitude_envelope);
-    acrylic_limiter_init(&s->limiter, 1, 0.7f);
+    acrylic_limiter_init(&s->limiter, 0.7f);
 }
 
 void acrylic_synth_process(acrylic_synth_t *a, float *data, int num_samples)
