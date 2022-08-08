@@ -23,6 +23,8 @@ static float calc_waveform(float t, acrylic_waveform_t type)
             return (0.5f - t) * 4.0f;
         else
             return (t - 1.0f) * 4.0f;
+    case ACRYLIC_WAVEFORM_PULSE:
+        return t < 0.5f ? -t + 1.5f : t - 1.5f;
     case ACRYLIC_WAVEFORM_NOISE:
         return arandom();
     default:

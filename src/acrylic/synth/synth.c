@@ -2,6 +2,9 @@
 #include "oscillator.h"
 #include "util.h"
 
+#include <windows.h>
+#include <SetupAPI.h>
+
 void acrylic_synth_init(acrylic_synth_t *s)
 {
     s->oscillator.amplitude_envelope.attack = 0;
@@ -9,7 +12,7 @@ void acrylic_synth_init(acrylic_synth_t *s)
     s->oscillator.amplitude_envelope.sustain = 1;
     s->oscillator.amplitude_envelope.release = 0;
     s->oscillator.volume = 1;
-    s->oscillator.waveform = ACRYLIC_WAVEFORM_SINE;
+    s->oscillator.waveform = ACRYLIC_WAVEFORM_PULSE;
     acrylic_envelope_initialize(&s->oscillator.amplitude_envelope);
     acrylic_limiter_init(&s->limiter, 0.7f);
 }
