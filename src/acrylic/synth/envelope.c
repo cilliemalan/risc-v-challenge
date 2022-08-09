@@ -11,8 +11,14 @@ void acrylic_envelope_initialize(acrylic_envelope_t *envelope)
     else
         envelope->_attack_rate = 1;
 
-    if (envelope->decay > OO_SAMPLE_RATE)
-        envelope->_decay_rate = OO_SAMPLE_RATE / envelope->decay;
+    if (envelope->decay > OO_SAMPLE_RATE && envelope->sustain < 1.0f)
+    {
+        envelope->_decay_rate = (OO_SAMPLE_RATE / envelope->decay) / (1.0f - envelope->sustain);
+        if (envelope->_decay_rate > 1)
+        {
+            envelope->_decay_rate = 1;
+        }
+    }
     else
         envelope->_decay_rate = 1;
 
@@ -45,7 +51,7 @@ float acrylic_envelope_tick(acrylic_envelope_state_t *state, acrylic_envelope_t 
     case ACRYLIC_OSCILLATOR_MODE_SUSTAIN:
         break;
     case ACRYLIC_OSCILLATOR_MODE_RELEASE:
-        state->level -= state->level * envelope->_release_rate;
+        state->level -= envelope->_release_rate;
         if (state->level <= 0.0f)
         {
             state->level = 0.0f;
