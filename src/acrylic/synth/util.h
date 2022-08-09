@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>
 
 #ifndef PI
 #define PI 3.14159265f
@@ -31,11 +32,11 @@ float afcosf(float t);
 float arandom();
 
 /** @brief convert a level (from 0 to 1) to an amplitude.
- *  This treats level 0 as -45db (the 16 bit SNR)
+ *  This treats level 0 as -45db
  */
 static inline float level_to_amplitude(float level)
 {
-    float db = (level - 1) * 4.5f;
+    float db = (level - 1) * 2.25f;
     return apow10(db);
 }
 

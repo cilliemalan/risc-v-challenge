@@ -7,11 +7,11 @@
 
 void acrylic_synth_init(acrylic_synth_t *s)
 {
-    s->oscillator.amplitude_envelope.attack = 0;
-    s->oscillator.amplitude_envelope.decay = 0;
-    s->oscillator.amplitude_envelope.sustain = 1;
-    s->oscillator.amplitude_envelope.release = 0;
-    s->oscillator.volume = 1;
+    s->oscillator.amplitude_envelope.attack = 1.0f;
+    s->oscillator.amplitude_envelope.decay = 1.0f;
+    s->oscillator.amplitude_envelope.sustain = 1.0f;
+    s->oscillator.amplitude_envelope.release = 1.0f;
+    s->oscillator.volume = 0.75f;
     s->oscillator.waveform = ACRYLIC_WAVEFORM_PULSE;
     acrylic_envelope_initialize(&s->oscillator.amplitude_envelope);
     acrylic_limiter_init(&s->limiter, 0.7f);
