@@ -52,7 +52,7 @@ void acrylic_oscillator_process(float *buffer, unsigned int amt, acrylic_oscilla
 
                     // turn the 0-1 level into
                     // logarithmic level
-                    sample *= level_to_amplitude(amp_e);
+                    sample *= level_to_amplitude(amp_e * oscillator->volume) * 0.5f;
 
                     // adjust note->t based on note frequency
                     float f = note->frequency;
